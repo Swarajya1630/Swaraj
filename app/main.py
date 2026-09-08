@@ -227,6 +227,32 @@ class JarvisApp:
 
         return "AI is offline. I can still open apps and search the web.", "english"
 
+    def _process_command_ui(self, text):
+        """Process command from UI and update UI with response."""
+        if self.ui_compact:
+            self.ui_compact.set_state("thinking")
+            self.ui_compact.set_status("THINKING")
+
+        if self.tray:
+            self.tray.update_status("thinking")
+
+        response, lang = self._process_command(text)
+
+        if self.ui_compact:
+            self.ui_compact.set_state("speaking")
+            self.ui_compact.set_status("SPEAKING")
+
+            if self.ui_compact.expanded_window:
+                self.ui_compact.expanded_window.add_message("Swaraj", response)
+
+            self.ui_compact.root.after(3000, lambda: self.ui_compact.set_state("idle"))
+            self.ui_compact.root.after(3000, lambda: self.ui_compact.set_status("STANDBY"))
+
+        if self.tray:
+            self.tray.update_status("running")
+
+        return response, lang
+
     def shutdown(self):
         if not self._running:
             return

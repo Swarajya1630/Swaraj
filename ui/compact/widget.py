@@ -18,6 +18,7 @@ class CompactWidget:
         self.canvas = None
         self._running = False
         self._expanded = False
+        self.expanded_window = None
 
         self.state = "idle"
         self.time = 0
@@ -57,6 +58,7 @@ class CompactWidget:
 
         self.canvas.bind("<Button-1>", self._on_click)
         self.canvas.bind("<B1-Motion>", self._on_drag)
+        self.canvas.bind("<ButtonRelease-1>", self._on_release)
 
         self._draw_content()
         self._animate()
@@ -64,6 +66,26 @@ class CompactWidget:
     def _on_click(self, event):
         self._drag_x = event.x
         self._drag_y = event.y
+        self._click_start_time = time.time()
+
+    def _on_release(self, event):
+        elapsed = time.time() - self._click_start_time
+        if elapsed < 0.3 and abs(event.x - self._drag_x) < 5:
+            self._toggle_expanded()
+
+    def _toggle_expanded(self):
+        if self.expanded_window and self.expanded_window._visible:
+            self.expanded_window.hide()
+        else:
+            self._show_expanded()
+
+    def _show_expanded(self):
+        if not self.expanded_window:
+            from ui.expanded.window import ExpandedWindow
+            self.expanded_window = ExpandedWindow(self.app)
+            if self.app:
+                self.expanded_window.on_send = self.app._process_command_ui
+        self.expanded_window.show()
 
     def _on_drag(self, event):
         x = self.root.winfo_x() + (event.x - self._drag_x)
