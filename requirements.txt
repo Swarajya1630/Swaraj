@@ -14,6 +14,12 @@ psutil==5.9.8
 pystray==0.19.5
 Pillow==10.4.0
 
+# Camera (OpenCV)
+opencv-python==4.10.0.84
+
 # Optional: Local wake word (better than Google API)
 # pip install pvporcupine
 # pip install openwakeword
+
+# Build
+# pyinstaller

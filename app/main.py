@@ -39,6 +39,10 @@ class SwarajApp:
         self.memory = None
         self.command_router = None
         self.sound = None
+        self.camera = None
+        self.semantic_memory = None
+        self.email_calendar = None
+        self.wake_trainer = None
 
         self.ai_brain = None
         self.wake_detector = None
@@ -153,6 +157,41 @@ class SwarajApp:
             logger.startup("Sound feedback initialized")
         except Exception as e:
             logger.warning(f"Sound feedback unavailable: {e}")
+
+        try:
+            from core.camera import CameraModule
+            self.camera = CameraModule()
+            if self.camera.is_available():
+                logger.startup("Camera module initialized")
+            else:
+                logger.warning("Camera module: OpenCV not installed")
+        except Exception as e:
+            logger.warning(f"Camera module unavailable: {e}")
+
+        try:
+            from core.semantic_memory import SemanticMemory
+            self.semantic_memory = SemanticMemory()
+            stats = self.semantic_memory.get_stats()
+            logger.startup(f"Semantic memory loaded: {stats['entries']} entries")
+        except Exception as e:
+            logger.warning(f"Semantic memory unavailable: {e}")
+
+        try:
+            from core.email_calendar import EmailCalendarModule
+            self.email_calendar = EmailCalendarModule()
+            logger.startup("Email/Calendar module initialized")
+        except Exception as e:
+            logger.warning(f"Email/Calendar unavailable: {e}")
+
+        try:
+            from core.wake_word_train import WakeWordTrainer
+            self.wake_trainer = WakeWordTrainer()
+            if self.wake_trainer.is_available():
+                logger.startup("Wake word trainer initialized")
+            else:
+                logger.warning("Wake word trainer: PyAudio not installed")
+        except Exception as e:
+            logger.warning(f"Wake word trainer unavailable: {e}")
 
     def _on_resume(self):
         logger.info("System resumed - reinitializing services")
