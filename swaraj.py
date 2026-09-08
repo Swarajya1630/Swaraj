@@ -27,6 +27,8 @@ from task_automation import TaskAutomation
 from wake_word import WakeWordDetector
 from identity import PersonalIdentity
 from reminders import Reminders
+from system_monitor import SystemMonitor
+from music_control import MusicControl
 
 
 class Swaraj:
@@ -39,6 +41,8 @@ class Swaraj:
         self.wake_detector = WakeWordDetector()
         self.identity = PersonalIdentity()
         self.reminders = Reminders()
+        self.sys_monitor = SystemMonitor()
+        self.music = MusicControl()
         self.current_language = language.lower()
 
         self.recognizer.set_language(self.current_language)
@@ -314,6 +318,40 @@ class Swaraj:
             if self.ai:
                 self.ai.clear_history()
             return "Fresh start! What's on your mind?", self.current_language
+
+        # --- System Monitoring ---
+        if "system" in text_lower or "status" in text_lower or "cpu" in text_lower or "ram" in text_lower:
+            return self.sys_monitor.get_status_text(), self.current_language
+
+        if "health" in text_lower and ("system" in text_lower or "pc" in text_lower or "computer" in text_lower):
+            return self.sys_monitor.get_health_report(), self.current_language
+
+        # --- Music Control ---
+        if "play" in text_lower and ("spotify" in text_lower or "music" in text_lower):
+            query = text_lower.replace("play", "").replace("on", "").replace("spotify", "").replace("music", "").strip()
+            return self.music.play_spotify(query), self.current_language
+
+        if "play" in text_lower and "youtube" in text_lower:
+            query = text_lower.replace("play", "").replace("on", "").replace("youtube", "").strip()
+            return self.music.play_youtube(query), self.current_language
+
+        if "pause" in text_lower or "resume" in text_lower:
+            return self.music.play_pause(), self.current_language
+
+        if "next" in text_lower and ("song" in text_lower or "track" in text_lower):
+            return self.music.next_track(), self.current_language
+
+        if "previous" in text_lower or "back" in text_lower and "song" in text_lower:
+            return self.music.previous_track(), self.current_language
+
+        if "volume up" in text_lower or "बढ़ाओ" in text_lower:
+            return self.music.volume_up(), self.current_language
+
+        if "volume down" in text_lower or "कम" in text_lower:
+            return self.music.volume_down(), self.current_language
+
+        if "mute" in text_lower or "चुप" in text_lower:
+            return self.music.mute(), self.current_language
 
         # --- Friendship Stats ---
         if "friendship" in text_lower or "level" in text_lower or "stats" in text_lower:
