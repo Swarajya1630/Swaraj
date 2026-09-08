@@ -28,6 +28,7 @@ class JarvisApp:
         self.power_handler = None
         self.ui_compact = None
         self.ui_expanded = None
+        self.pipeline = None
 
         self.ai_brain = None
         self.wake_detector = None
@@ -111,6 +112,13 @@ class JarvisApp:
         except Exception as e:
             logger.error(f"Power handler init failed: {e}")
 
+        try:
+            from core.pipeline import SpeechPipeline
+            self.pipeline = SpeechPipeline(self)
+            self.pipeline.initialize()
+        except Exception as e:
+            logger.error(f"Pipeline init failed: {e}")
+
     def _on_resume(self):
         logger.info("System resumed - reinitializing services")
         try:
@@ -165,6 +173,9 @@ class JarvisApp:
     def run(self, mode="background"):
         self._running = True
         logger.startup(f"Running in {mode} mode")
+
+        if self.pipeline:
+            self.pipeline.start()
 
         if mode == "background":
             self.start_tray()
@@ -259,6 +270,9 @@ class JarvisApp:
 
         logger.startup("=== JARVIS Shutting Down ===")
         self._running = False
+
+        if self.pipeline:
+            self.pipeline.stop()
 
         if self.tray:
             self.tray.stop()
