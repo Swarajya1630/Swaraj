@@ -13,7 +13,9 @@ class CommandRouter:
     def __init__(self, app=None):
         self.app = app
         self.handlers = {}
+        self.learning = None
         self._register_default_handlers()
+        self._init_learning()
 
     def _register_default_handlers(self):
         from commands.app_control import AppControlCommand
@@ -28,12 +30,24 @@ class CommandRouter:
         self.register("web", WebSearchCommand(self.app))
         self.register("productivity", ProductivityCommand(self.app))
 
+    def _init_learning(self):
+        try:
+            from core.learning import LearningSystem
+            self.learning = LearningSystem()
+        except Exception as e:
+            logger.warning(f"Learning system init failed: {e}")
+
     def register(self, category, handler):
         self.handlers[category] = handler
 
     def route(self, text):
         """Route a command to the appropriate handler."""
         text_lower = text.lower().strip()
+
+        if self.learning:
+            learning_response = self.learning.check(text)
+            if learning_response:
+                return learning_response, "english"
 
         intent = self._detect_intent(text_lower)
 
