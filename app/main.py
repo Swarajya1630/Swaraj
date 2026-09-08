@@ -35,6 +35,9 @@ class SwarajApp:
         self.ui_compact = None
         self.ui_expanded = None
         self.pipeline = None
+        self.settings_window = None
+        self.memory = None
+        self.command_router = None
 
         self.ai_brain = None
         self.wake_detector = None
@@ -70,6 +73,14 @@ class SwarajApp:
             logger.startup(f"Identity loaded. Owner: {owner}")
         except Exception as e:
             logger.error(f"Identity init failed: {e}")
+
+        try:
+            from core.memory import MemorySystem
+            self.memory = MemorySystem()
+            stats = self.memory.get_stats()
+            logger.startup(f"Memory loaded. Conversations: {stats['conversations']}, Facts: {stats['facts']}")
+        except Exception as e:
+            logger.error(f"Memory init failed: {e}")
 
     def _init_ai(self):
         try:
@@ -153,6 +164,7 @@ class SwarajApp:
                 open=self._on_tray_open,
                 pause=self._on_tray_pause,
                 resume=self._on_tray_resume,
+                settings=self._on_tray_settings,
                 exit=self._on_tray_exit
             )
             self.tray.start()
@@ -173,6 +185,10 @@ class SwarajApp:
         if self.tray:
             self.tray.update_status("running")
 
+    def _on_tray_settings(self):
+        logger.info("Tray: Open settings")
+        self.show_settings()
+
     def _on_tray_exit(self):
         logger.info("Tray: Exit requested")
         self.shutdown()
@@ -185,6 +201,16 @@ class SwarajApp:
                 self.ui_compact.start()
             except Exception as e:
                 logger.error(f"Compact UI failed: {e}")
+
+    def show_settings(self):
+        if self.settings_window is None:
+            try:
+                from ui.settings.window import SettingsWindow
+                self.settings_window = SettingsWindow(self)
+            except Exception as e:
+                logger.error(f"Settings init failed: {e}")
+                return
+        self.settings_window.show()
 
     def run(self, mode="background"):
         self._running = True
@@ -260,6 +286,9 @@ class SwarajApp:
             self.tray.update_status("thinking")
 
         response, lang = self._process_command(text)
+
+        if self.memory:
+            self.memory.add_conversation(text, response)
 
         if self.ui_compact:
             self.ui_compact.set_state("speaking")
