@@ -30,5 +30,12 @@ desktop.ini
 # Images (user-specific)
 assets/rajmudra.png
 
+# Rajmudra source (keep in repo for reference)
+!assets/branding/rajmudra_source.jpg
+!assets/branding/rajmudra_widget.png
+!assets/branding/rajmudra_expanded.png
+!assets/branding/rajmudra_tray.png
+!assets/branding/rajmudra_splash.png
+
 # Git internal files (if nested)
 .gitignore.2

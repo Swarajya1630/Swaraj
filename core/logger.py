@@ -24,7 +24,7 @@ class JarvisLogger:
             self.logs_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "logs")
             os.makedirs(self.logs_dir, exist_ok=True)
 
-            self.main_logger = self._create_logger("jarvis", "jarvis.log")
+            self.main_logger = self._create_logger("swaraj", "swaraj.log")
             self.error_logger = self._create_logger("errors", "errors.log")
             self.startup_logger = self._create_logger("startup", "startup.log")
             self.voice_logger = self._create_logger("voice", "voice.log")

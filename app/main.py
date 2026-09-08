@@ -1,8 +1,14 @@
 """
-Application Lifecycle
-====================
-Main entry point and lifecycle manager.
-Handles initialization, running, and shutdown.
+S.W.A.R.A.J - Smart Wide-purpose Automated Reasoning And Assistance Junction
+==============================================================================
+Your personal AI best friend. Only YOU (Shiva) can talk to it.
+
+Usage:
+    python app/main.py                    # Background mode (system tray)
+    python app/main.py --text             # Text mode
+    python app/main.py --ui               # UI mode
+    python app/main.py --setup            # Setup mode
+    python app/main.py --startup          # Started by Windows
 """
 
 import sys
@@ -17,7 +23,7 @@ from config.settings import Config
 from core.logger import logger
 
 
-class JarvisApp:
+class SwarajApp:
     def __init__(self):
         self.config = Config()
         self._running = False
@@ -44,7 +50,7 @@ class JarvisApp:
         self.shutdown()
 
     def initialize(self):
-        logger.startup("=== JARVIS Starting ===")
+        logger.startup("=== SWARAJ Starting ===")
         logger.startup(f"Python: {sys.version}")
         logger.startup(f"Working dir: {os.getcwd()}")
 
@@ -53,7 +59,7 @@ class JarvisApp:
         self._init_voice()
         self._init_services()
 
-        logger.startup("=== JARVIS Initialized ===")
+        logger.startup("=== SWARAJ Initialized ===")
         return True
 
     def _init_identity(self):
@@ -268,7 +274,7 @@ class JarvisApp:
         if not self._running:
             return
 
-        logger.startup("=== JARVIS Shutting Down ===")
+        logger.startup("=== SWARAJ Shutting Down ===")
         self._running = False
 
         if self.pipeline:
@@ -287,7 +293,7 @@ class JarvisApp:
                 pass
 
         self._shutdown_event.set()
-        logger.startup("=== JARVIS Stopped ===")
+        logger.startup("=== SWARAJ Stopped ===")
 
 
 def main():
@@ -300,7 +306,7 @@ def main():
     parser.add_argument("--lang", type=str, default="english", help="Language")
     args = parser.parse_args()
 
-    app = JarvisApp()
+    app = SwarajApp()
 
     if not app.initialize():
         logger.error("Initialization failed!")

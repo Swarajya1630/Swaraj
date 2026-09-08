@@ -1,7 +1,7 @@
 """
-System Tray Service
-==================
-Windows system tray icon for JARVIS.
+Swaraj System Tray Service
+==========================
+Windows system tray icon using Rajmudra.
 Provides quick access and status indication.
 """
 
@@ -33,7 +33,6 @@ class SystemTray:
             "exit": None
         }
         self._status = "running"
-        self._paused = False
 
     def set_callbacks(self, **kwargs):
         for key, value in kwargs.items():
@@ -41,7 +40,17 @@ class SystemTray:
                 self._callbacks[key] = value
 
     def _create_icon_image(self):
-        """Create a simple icon for the tray."""
+        """Load the Rajmudra image for tray icon."""
+        asset_path = os.path.join(os.path.dirname(__file__), "..", "..", "assets", "branding", "rajmudra_tray.png")
+        asset_path = os.path.normpath(asset_path)
+
+        if os.path.exists(asset_path):
+            try:
+                from PIL import Image
+                return Image.open(asset_path)
+            except Exception as e:
+                logger.error(f"Failed to load tray icon: {e}")
+
         try:
             from PIL import Image, ImageDraw
 
@@ -65,7 +74,7 @@ class SystemTray:
             image = self._create_icon_image()
 
             menu = pystray.Menu(
-                MenuItem("Open Assistant", lambda: self._trigger("open")),
+                MenuItem("Open Swaraj", lambda: self._trigger("open")),
                 MenuItem("Pause Listening", lambda: self._trigger("pause")),
                 MenuItem("Resume Listening", lambda: self._trigger("resume")),
                 pystray.Menu.SEPARATOR,
