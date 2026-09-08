@@ -1,9 +1,19 @@
-# Swaraj Dependencies
+# Swaraj AI Assistant - Dependencies
 # Run: pip install -r requirements.txt
 
+# Core
 SpeechRecognition==3.10.4
 pyttsx3==2.90
 python-dotenv==1.0.1
 requests==2.32.3
 wikipedia==1.4.0
 pyaudio==0.2.14
+psutil==5.9.8
+
+# System Tray
+pystray==0.19.5
+Pillow==10.4.0
+
+# Optional: Local wake word (better than Google API)
+# pip install pvporcupine
+# pip install openwakeword
