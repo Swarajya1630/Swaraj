@@ -78,6 +78,26 @@ class LearningSystem:
             "project_status": {
                 "keywords": ["project status", "version", "what can you do", "features"],
                 "response": self._project_status
+            },
+            "camera": {
+                "keywords": ["camera", "webcam", "screenshot", "face detection", "qr code", "photo", "picture", "scan"],
+                "response": self._explain_camera
+            },
+            "semantic_memory": {
+                "keywords": ["semantic", "vector", "embedding", "similarity search", "memory search"],
+                "response": self._explain_semantic_memory
+            },
+            "email_calendar": {
+                "keywords": ["email", "calendar", "event", "meeting", "contact", "schedule", "appointment"],
+                "response": self._explain_email_calendar
+            },
+            "wake_training": {
+                "keywords": ["wake word training", "custom wake", "train wake", "activation phrase", "custom activation"],
+                "response": self._explain_wake_training
+            },
+            "pyinstaller": {
+                "keywords": ["exe", "executable", "build", "package", "distribute", "pyinstaller"],
+                "response": self._explain_pyinstaller
             }
         }
 
@@ -566,8 +586,174 @@ IMPLEMENTED FEATURES:
 AI PROVIDER: Ollama (Mistral model)
 VOICE: Google Speech API + pyttsx3
 UI: tkinter (Python)
-PLATFORM: Windows
+CAMERA: OpenCV (face detection, QR scanning)
+MEMORY: TF-IDF semantic search
+CALENDAR: Local event storage
+BUILD: PyInstaller (Windows .exe)
+
+ADDITIONAL FEATURES:
+✅ Camera (screenshot, face detection, QR scanning)
+✅ Semantic memory (vector search)
+✅ Email/Calendar integration
+✅ Custom wake word training
+✅ PyInstaller packaging
+✅ Learning/Tutorial system
 
 START COMMAND: python app/main.py
 TEXT MODE: python app/main.py --text
-UI MODE: python app/main.py --ui"""
+UI MODE: python app/main.py --ui
+BUILD COMMAND: build.bat (creates dist/Swaraj/Swaraj.exe)"""
+
+    def _explain_camera(self):
+        return """CAMERA SYSTEM
+
+I can use your webcam for various tasks:
+
+CAPABILITIES:
+• Take screenshots from webcam
+• Detect faces using Haar cascades
+• Scan QR codes
+• Get camera info
+
+FILES:
+- core/camera.py -> CameraModule
+
+TECHNOLOGY:
+- OpenCV (cv2) for computer vision
+- Haar cascade for face detection
+- Built-in QRCodeDetector
+
+SAY:
+- "Take screenshot" - capture webcam image
+- "Detect faces" - find faces in view
+- "Scan QR" - read QR code
+- "Camera info" - show camera details
+
+Files saved to: swaraj/screenshots/
+
+Face detection uses: haarcascade_frontalface_default.xml"""
+
+    def _explain_semantic_memory(self):
+        return """SEMANTIC MEMORY
+
+I use vector search for context-aware memory:
+
+HOW IT WORKS:
+1. Text is converted to TF-IDF vectors
+2. Stored with metadata
+3. Searched using cosine similarity
+4. Provides context for AI responses
+
+FILES:
+- core/semantic_memory.py -> SemanticMemory
+- config/memory/vectors.json
+
+TECHNOLOGY:
+- TF-IDF (Term Frequency-Inverse Document Frequency)
+- Cosine similarity for matching
+- Local storage (no external DB)
+
+FEATURES:
+• Auto-learns from conversations
+• Semantic search (meaning-based)
+• Context injection for AI
+• Vocabulary management
+
+STATS:
+- Entries: text chunks stored
+- Vocabulary: unique words indexed"""
+
+    def _explain_email_calendar(self):
+        return """EMAIL/CALENDAR INTEGRATION
+
+I manage events and contacts locally:
+
+EVENTS:
+• Add events with date/time
+• List events by date
+• View upcoming events (7 days)
+• Delete events
+
+CONTACTS:
+• Add contacts (name, email, phone)
+• Search contacts by name
+• Local storage
+
+FILES:
+- core/email_calendar.py -> EmailCalendarModule
+- config/calendar/events.json
+- config/calendar/contacts.json
+
+SAY:
+- "Add event meeting on 2024-01-15 at 10:00"
+- "List events" or "Show calendar"
+- "Upcoming events" or "What's next"
+- "Add contact John with email john@example.com"
+- "Find contact John"
+
+Supports: YYYY-MM-DD and DD/MM/YYYY formats"""
+
+    def _explain_wake_training(self):
+        return """CUSTOM WAKE WORD TRAINING
+
+I can learn custom activation phrases:
+
+CAPABILITIES:
+• Record wake word samples
+• Add custom phrases
+• Remove phrases
+• Enable/disable phrases
+
+FILES:
+- core/wake_word_train.py -> WakeWordTrainer
+- config/wake_words/custom_words.json
+- config/wake_words/recordings/
+
+DEFAULT WAKE WORDS:
+- "Hey Swaraj"
+- "Swaraj"
+
+CUSTOM PHRASES:
+- Added via training
+- Stored as text patterns
+- Detected alongside defaults
+
+SAY:
+- "Add wake word hello assistant"
+- "List wake words"
+- "Remove wake word hello assistant"
+
+Recordings saved as WAV files for future reference."""
+
+    def _explain_pyinstaller(self):
+        return """PYINSTALLER PACKAGING
+
+I can be packaged as a Windows executable:
+
+BUILD PROCESS:
+1. Run: build.bat
+2. PyInstaller analyzes dependencies
+3. Creates dist/Swaraj/ folder
+4. Executable: dist/Swaraj/Swaraj.exe
+
+FILES:
+- Swaraj.spec -> PyInstaller configuration
+- build.bat -> Build script
+
+WHAT'S INCLUDED:
+- All Python modules
+- Assets (Rajmudra images)
+- Config files
+- All dependencies
+
+DISTRIBUTION:
+- Copy entire dist/Swaraj/ folder
+- No Python required on target
+- Runs on any Windows 10+ machine
+
+COMMANDS:
+- Build: build.bat
+- Clean: pyinstaller --clean Swaraj.spec
+- Debug: pyinstaller Swaraj.spec --debug
+
+Output size: ~50-100MB"""
