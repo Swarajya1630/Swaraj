@@ -134,9 +134,11 @@ class SwarajApp:
         try:
             from services.windows.power_handler import PowerStateHandler
             self.power_handler = PowerStateHandler()
+            self.power_handler.set_app(self)
             self.power_handler.register_callbacks(
                 on_resume=self._on_resume,
-                on_sleep=self._on_sleep
+                on_sleep=self._on_sleep,
+                on_wake_listen=self._on_wake_listen
             )
             self.power_handler.start_listening()
         except Exception as e:
@@ -202,6 +204,19 @@ class SwarajApp:
 
     def _on_sleep(self):
         logger.info("System entering sleep - pausing services")
+
+    def _on_wake_listen(self):
+        logger.info("Wake detected - listening for next command")
+        if self.ui_compact:
+            try:
+                self.ui_compact.update_status("listening")
+            except:
+                pass
+        if self.sound:
+            try:
+                self.sound.play("listening")
+            except:
+                pass
 
     def start_tray(self):
         try:
