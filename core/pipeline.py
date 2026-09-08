@@ -57,6 +57,9 @@ class SpeechPipeline:
         logger.info("Wake word detected - entering active listening")
         self._active = True
 
+        if self.app and self.app.sound:
+            self.app.sound.play_wake()
+
         if self.app and self.app.ui_compact:
             self.app.ui_compact.set_state("listening")
             self.app.ui_compact.set_status("LISTENING")

@@ -38,6 +38,7 @@ class SwarajApp:
         self.settings_window = None
         self.memory = None
         self.command_router = None
+        self.sound = None
 
         self.ai_brain = None
         self.wake_detector = None
@@ -145,6 +146,13 @@ class SwarajApp:
             logger.error(f"Pipeline init failed: {e}")
 
         self._init_command_router()
+
+        try:
+            from core.sound import SoundFeedback
+            self.sound = SoundFeedback()
+            logger.startup("Sound feedback initialized")
+        except Exception as e:
+            logger.warning(f"Sound feedback unavailable: {e}")
 
     def _on_resume(self):
         logger.info("System resumed - reinitializing services")
@@ -284,6 +292,9 @@ class SwarajApp:
 
         if self.tray:
             self.tray.update_status("thinking")
+
+        if self.sound:
+            self.sound.play_thinking()
 
         response, lang = self._process_command(text)
 
