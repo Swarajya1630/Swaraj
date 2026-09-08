@@ -1,6 +1,6 @@
 """
 Windows Power State Handler
-==========================
+=========================
 Handles sleep/hibernate/resume events.
 Reinitializes services after resume.
 """
@@ -31,32 +31,11 @@ class PowerStateHandler:
         logger.info("Power state listener started")
 
     def _listen_loop(self):
-        """Monitor power state changes."""
-        try:
-            import win32api
-            import win32con
-            import win32gui
-
-            def on_power_broadcast(hwnd, msg, wparam, lparam):
-                if msg == win32con.WM_POWERBROADCAST:
-                    if wparam == win32con.PBT_APMRESUMEAUTOMATIC or wparam == win32con.PBT_APMRESUMESUSPEND:
-                        logger.info("Windows resumed from sleep/hibernate")
-                        self._trigger_callbacks(self.on_resume_callbacks)
-                    elif wparam == win32con.PBT_APMSUSPEND:
-                        logger.info("Windows entering sleep/hibernate")
-                        self._trigger_callbacks(self.on_sleep_callbacks)
-
-            message_map = {win32con.WM_POWERBROADCAST: on_power_broadcast}
-            hwnd = win32gui.CreateWindowEx(0, "Static", "", 0, 0, 0, 0, 0, 0, 0, 0, None)
-            win32gui.RegisterClass(message_map)
-            win32gui.PumpMessages()
-
-        except ImportError:
-            logger.warning("win32gui not available, using polling for power state")
-            self._poll_power_state()
+        """Monitor power state changes using polling (most reliable)."""
+        self._poll_power_state()
 
     def _poll_power_state(self):
-        """Fallback: poll system power state."""
+        """Poll system power state for sleep/wake detection."""
         import time
         last_state = self._get_system_state()
 
