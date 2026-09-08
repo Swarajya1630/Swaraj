@@ -10,6 +10,7 @@ import math
 import time
 import threading
 import os
+from ui.animations import AnimationHelper
 
 
 class CompactWidget:
@@ -35,6 +36,8 @@ class CompactWidget:
         self.GOLD = "#c9a227"
         self.WHITE = "#ffffff"
         self.DARK = "#0a0a12"
+
+        self.anim = AnimationHelper()
 
         self.rajmudra_photo = None
         self._load_rajmudra()
@@ -209,8 +212,9 @@ class CompactWidget:
         if not self._running:
             return
 
-        self.time += 0.05
-        self.pulse = math.sin(self.time * 2)
+        self.anim.update()
+        self.time = self.anim.time
+        self.pulse = self.anim.pulse
         self._draw_content()
         self.root.after(50, self._animate)
 
