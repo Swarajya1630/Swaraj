@@ -1,103 +1,169 @@
-# SWARAJ
+# SWARAJ — Windows AI Voice Assistant
 
-**S**mart **W**ide-purpose **A**utomated **R**easoning **A**nd assistance **J**unction
+Your personal AI assistant powered by Ollama (100% local). Only YOU can talk to it.
 
-Your personal AI best friend that runs 100% locally on your laptop. No API keys, no internet needed for AI. Supports English, Hindi, and Marathi.
+Inspired by Chhatrapati Shivaji Maharaj's Rajmudra.
 
 ---
 
 ## Features
 
-- **100% Free & Local** - Uses Ollama for AI, no API costs
-- **Multilingual** - English, Hindi, Marathi
-- **Personal Friend** - Only YOU can talk to it
-- **Website Bookmarks** - Save and open links with custom names
-- **App Launcher** - Open any app with voice/text
-- **Jarvis-style UI** - Rajmudra startup, arc reactor interface
-- **Voice Commands** - Say "Hey Swaraj" to activate
+- **Rajmudra Visual Identity** — Golden seal as the core visual element
+- **Floating Widget** — Top-right corner, always on top
+- **Wake Word Detection** — "Hey Swaraj" or "Swaraj"
+- **Voice Commands** — Open apps, search web, check weather, reminders
+- **System Tray** — Runs in background
+- **Windows Startup** — Launches automatically
+- **Sleep/Resume Handling** — Recovers after Windows sleep
+- **Multilingual** — English, Hindi, Marathi
+- **Local AI** — Uses Ollama (no cloud API needed)
+- **Settings UI** — Configure everything from the UI
+- **Sound Feedback** — Audio cues for states
 
 ---
 
 ## Quick Start
 
-### 1. Install Ollama
-Download from [ollama.com](https://ollama.com)
+### Prerequisites
+
+1. **Python 3.10+** — [Download](https://python.org)
+2. **Ollama** — [Download](https://ollama.com)
+3. **Mistral Model** — Run: `ollama pull mistral`
+
+### Installation
 
 ```bash
-ollama serve
-ollama pull mistral
+# Clone the repository
+git clone https://github.com/Swarajya1630/Swaraj.git
+cd Swaraj
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-### 2. Install Python Dependencies
+### Run
+
 ```bash
-pip install SpeechRecognition pyttsx3 python-dotenv requests wikipedia pyaudio Pillow
+# Background mode (recommended)
+python app/main.py
+
+# Text mode
+python app/main.py --text
+
+# UI mode
+python app/main.py --ui
 ```
 
-### 3. Setup (First Time)
-```bash
-python swaraj.py --setup
-```
-
-### 4. Run
-```bash
-python swaraj.py --text     # Text mode
-python swaraj.py --ui       # GUI mode
-python swaraj.py            # Voice mode
-```
-
-Or double-click `start.bat` for a menu.
+Or double-click `start.bat`.
 
 ---
 
-## Commands
+## Voice Commands
 
-| Command | Description |
-|---------|-------------|
-| `open chrome` | Open Chrome browser |
-| `search for AI` | Google search |
-| `what time is it` | Tell current time |
-| `save website youtube.com as youtube` | Save bookmark |
-| `open youtube` | Open saved bookmark |
-| `list websites` | Show all bookmarks |
-| `switch to hindi` | Change language |
-| `friendship stats` | Show friendship level |
-| `exit` | Quit Swaraj |
+| Command | Action |
+|---------|--------|
+| "Hey Swaraj" | Wake up |
+| "open Chrome" | Opens Chrome |
+| "open my project" | Opens project folder |
+| "what time is it" | Tells time |
+| "what's the weather" | Shows weather |
+| "volume up" | Increases volume |
+| "play lofi on Spotify" | Opens Spotify search |
+| "search Google for Python" | Opens Google |
+| "remind me to drink water in 30 min" | Sets reminder |
+| "note buy groceries" | Saves note |
+| "system status" | Shows CPU/RAM/Disk |
 
 ---
 
 ## Project Structure
 
 ```
-jarvis/
-  swaraj.py          # Main entry point
-  ai_brain.py        # Ollama AI integration
-  listener.py        # Speech recognition
-  speaker.py         # Text-to-speech
-  task_automation.py # App launcher, web search
-  wake_word.py       # "Hey Swaraj" detection
-  identity.py        # Personal identity & memories
-  ui.py              # Jarvis-style GUI
-  assets/            # Images (Rajmudra)
-  start.bat          # Quick launcher
+swaraj/
+├── app/main.py              # Entry point
+├── config/settings.py       # Configuration
+├── core/                    # Core modules
+│   ├── logger.py           # Logging
+│   ├── memory.py           # Memory system
+│   ├── pipeline.py         # Speech pipeline
+│   ├── router.py           # Command router
+│   ├── sound.py            # Sound feedback
+│   └── wake_word_local.py  # Wake word
+├── commands/                # Command handlers
+│   ├── app_control.py      # App management
+│   ├── media_control.py    # Volume, playback
+│   ├── productivity.py     # Reminders, notes
+│   ├── system_control.py   # Time, date, status
+│   └── web_search.py       # Search, weather
+├── ui/                      # User interface
+│   ├── compact/widget.py   # Floating widget
+│   ├── expanded/window.py  # Full interface
+│   ├── settings/window.py  # Settings
+│   └── tray/system_tray.py # System tray
+├── services/                # Windows integration
+│   ├── startup/            # Windows startup
+│   └── windows/            # Power handling
+└── assets/branding/         # Rajmudra assets
 ```
 
 ---
 
-## Tech Stack
+## Configuration
 
-- **Python 3.13+**
-- **Ollama** - Local AI (Mistral model)
-- **SpeechRecognition** - Voice to text
-- **pyttsx3** - Text to voice
-- **tkinter** - GUI framework
-- **Pillow** - Image handling
+Settings are stored in `config/settings.json`.
+
+Key settings:
+- `general.start_with_windows` — Auto-launch with Windows
+- `general.start_minimized` — Start to system tray
+- `voice.wake_word_enabled` — Enable wake word detection
+- `ai.model` — Ollama model (default: mistral)
+
+---
+
+## Architecture
+
+```
+Microphone
+    ↓
+Wake Word Detection ("Hey Swaraj")
+    ↓
+Speech-to-Text (Google API)
+    ↓
+Command Router (Intent Detection)
+    ↓
+Command Handler (App/System/Media/Web/Productivity)
+    ↓
+Response
+    ↓
+Text-to-Speech (pyttsx3)
+    ↓
+Return to Dormant
+```
+
+---
+
+## Technologies
+
+- **Python 3.10+**
+- **Ollama** — Local AI (Mistral model)
+- **tkinter** — GUI framework
+- **SpeechRecognition** — Speech-to-text
+- **pyttsx3** — Text-to-speech
+- **pyaudio** — Microphone access
+- **pystray** — System tray
+- **Pillow** — Image handling
+- **psutil** — System monitoring
 
 ---
 
 ## License
 
-Personal project - Not for commercial use.
+Personal project by Swayam Naik.
 
 ---
 
-*Built with pride by Swayam*
+## Acknowledgments
+
+- Chhatrapati Shivaji Maharaj — Inspiration for the Rajmudra identity
+- Ollama — Local AI backend
+- The open-source Python community

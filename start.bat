@@ -1,56 +1,67 @@
 @echo off
-title SWARAJ - Voice Assistant
-color 0A
-echo.
-echo  ███████╗██╗   ██╗██████╗ ██╗   ██╗██████╗ ███████╗ █████╗ ███╗   ██╗
-echo  ██╔════╝╚██╗ ██╔╝██╔══██╗██║   ██║██╔══██╗██╔════╝██╔══██╗████╗  ██║
-echo  ███████╗ ╚████╔╝ ██████╔╝██║   ██║██████╔╝█████╗  ███████║██╔██╗ ██║
-echo  ╚════██║  ╚██╔╝  ██╔══██╗██║   ██║██╔═══╝ ██╔══╝  ██╔══██║██║╚██╗██║
-echo  ███████║   ██║   ██████╔╝╚██████╔╝██║     ███████╗██║  ██║██║ ╚████║
-echo  ╚══════╝   ╚═╝   ╚═════╝  ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═╝╚═╝  ╚═══╝
-echo.
-echo  [1] Text Mode (Type commands)
-echo  [2] Voice Mode (Say "Hey Swaraj")
-echo  [3] Voice Mode (Always listening)
-echo  [4] GUI Mode (Siri-like interface)
-echo  [5] Setup (First time / retrain)
-echo  [6] Hindi Mode
-echo  [7] Marathi Mode
-echo  [8] Exit
-echo.
-set /p choice="Choose option (1-8): "
+title SWARAJ - AI Assistant
+color 0B
 
-if "%choice%"=="1" (
-    echo.
-    echo Starting Text Mode...
-    python swaraj.py --text
-) else if "%choice%"=="2" (
-    echo.
-    echo Starting Voice Mode (say "Hey Swaraj" to activate)...
-    python swaraj.py
-) else if "%choice%"=="3" (
-    echo.
-    echo Starting Voice Mode (always listening)...
-    python swaraj.py --voice
-) else if "%choice%"=="4" (
-    echo.
-    echo Starting GUI...
-    python swaraj.py --ui
-) else if "%choice%"=="5" (
-    echo.
-    python swaraj.py --setup
-) else if "%choice%"=="6" (
-    echo.
-    echo Starting Hindi Mode...
-    python swaraj.py --text --lang hindi
-) else if "%choice%"=="7" (
-    echo.
-    echo Starting Marathi Mode...
-    python swaraj.py --text --lang marathi
-) else if "%choice%"=="8" (
-    echo Goodbye!
-    exit
-) else (
-    echo Invalid choice. Starting Text Mode...
-    python swaraj.py --text
-)
+echo.
+echo  ================================
+echo       S W A R A J
+echo   AI Voice Assistant
+echo  ================================
+echo.
+echo  [1] Start SWARAJ (Background)
+echo  [2] Start SWARAJ (Text Mode)
+echo  [3] Start SWARAJ (UI Mode)
+echo  [4] Setup / Configure
+echo  [5] View Logs
+echo  [6] Exit
+echo.
+set /p choice="Select option: "
+
+if "%choice%"=="1" goto background
+if "%choice%"=="2" goto text
+if "%choice%"=="3" goto ui
+if "%choice%"=="4" goto setup
+if "%choice%"=="5" goto logs
+if "%choice%"=="6" goto exit
+
+echo Invalid option. Try again.
+pause
+goto start
+
+:background
+echo.
+echo Starting SWARAJ in background mode...
+python app/main.py
+goto end
+
+:text
+echo.
+echo Starting SWARAJ in text mode...
+python app/main.py --text
+goto end
+
+:ui
+echo.
+echo Starting SWARAJ in UI mode...
+python app/main.py --ui
+goto end
+
+:setup
+echo.
+echo Starting SWARAJ setup...
+python app/main.py --setup
+goto end
+
+:logs
+echo.
+echo Opening logs folder...
+explorer logs
+goto start
+
+:exit
+echo.
+echo Goodbye!
+exit /b
+
+:end
+pause
