@@ -16,6 +16,7 @@ Usage:
 import sys
 import os
 import json
+from datetime import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -25,6 +26,7 @@ from ai_brain import AIBrain
 from task_automation import TaskAutomation
 from wake_word import WakeWordDetector
 from identity import PersonalIdentity
+from reminders import Reminders
 
 
 class Swaraj:
@@ -36,6 +38,7 @@ class Swaraj:
         self.automation = TaskAutomation()
         self.wake_detector = WakeWordDetector()
         self.identity = PersonalIdentity()
+        self.reminders = Reminders()
         self.current_language = language.lower()
 
         self.recognizer.set_language(self.current_language)
@@ -152,6 +155,67 @@ class Swaraj:
 
         return None
 
+    def _handle_reminder(self, text):
+        """Handle reminder commands."""
+        text_lower = text.lower()
+
+        # List reminders
+        if "list" in text_lower or "show" in text_lower or "all" in text_lower:
+            pending = self.reminders.list_pending()
+            if pending:
+                lines = ["Your reminders:"]
+                for r in pending:
+                    remind_time = datetime.fromisoformat(r["remind_at"])
+                    time_str = remind_time.strftime("%I:%M %p")
+                    lines.append(f"  #{r['id']}: {r['text']} at {time_str}")
+                return "\n".join(lines), self.current_language
+            return "No pending reminders.", self.current_language
+
+        # Add reminder: "remind me to drink water in 30 minutes"
+        if "me to" in text_lower or "मुझे" in text_lower or "मला" in text_lower:
+            # Extract the task
+            task = text_lower
+            for phrase in ["remind me to", "remind me", "reminder to", "याद दिला", "आठवण"]:
+                task = task.replace(phrase, "")
+            task = task.strip()
+
+            # Extract time
+            minutes = None
+            hours = None
+            if "minute" in text_lower:
+                import re
+                nums = re.findall(r'\d+', text_lower)
+                minutes = int(nums[0]) if nums else 5
+            elif "hour" in text_lower:
+                import re
+                nums = re.findall(r'\d+', text_lower)
+                hours = int(nums[0]) if nums else 1
+            elif "day" in text_lower:
+                import re
+                nums = re.findall(r'\d+', text_lower)
+                days = int(nums[0]) if nums else 1
+                self.reminders.add(task, days=days)
+                return f"Okay! I'll remind you to '{task}' in {days} day(s).", self.current_language
+            else:
+                minutes = 5  # Default
+
+            if minutes:
+                self.reminders.add(task, minutes=minutes)
+                return f"Okay! I'll remind you to '{task}' in {minutes} minutes.", self.current_language
+            elif hours:
+                self.reminders.add(task, hours=hours)
+                return f"Okay! I'll remind you to '{task}' in {hours} hour(s).", self.current_language
+
+        # Check reminders (usually called internally)
+        if "check" in text_lower:
+            due = self.reminders.check()
+            if due:
+                texts = [f"Reminder: {r['text']}" for r in due]
+                return "\n".join(texts), self.current_language
+            return "No reminders due yet.", self.current_language
+
+        return "Tell me what to remind you. Example: 'remind me to drink water in 30 minutes'", self.current_language
+
     def _handle_bookmark(self, text):
         """Handle bookmark operations."""
         text_lower = text.lower()
@@ -258,6 +322,10 @@ class Swaraj:
             convos = self.identity.data["friendship"]["total_conversations"]
             return (f"Friendship Level: {level} | XP: {xp} | "
                     f"Conversations: {convos}. We're getting closer!"), self.current_language
+
+        # --- Reminder Commands ---
+        if "remind" in text_lower or "reminder" in text_lower or "याद दिला" in text_lower or "आठवण" in text_lower:
+            return self._handle_reminder(text)
 
         # --- Bookmark Commands ---
         if self._detect_bookmark_command(text):
