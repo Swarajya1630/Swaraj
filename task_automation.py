@@ -144,8 +144,25 @@ class TaskAutomation:
                 return True
         return False
 
+    def get_weather(self, city="auto"):
+        """Get current weather."""
+        try:
+            from weather import Weather
+            w = Weather(city)
+            data = w.get_weather(city)
+            return f"Weather in {data['city']}: {data['temp_c']}°C, {data['condition']}. Humidity: {data['humidity']}%, Wind: {data['wind_speed']}km/h"
+        except Exception as e:
+            return f"Couldn't fetch weather: {str(e)}"
+
     def execute_command(self, text, language="english"):
         text_lower = text.lower()
+
+        # --- Weather ---
+        if "weather" in text_lower or "मौसम" in text_lower or "हवामान" in text_lower:
+            city = "auto"
+            if " in " in text_lower:
+                city = text_lower.split(" in ")[-1].strip()
+            return self.get_weather(city)
 
         # --- Play on Spotify ---
         if self._check_keywords(text, "play") and "spotify" in text_lower:

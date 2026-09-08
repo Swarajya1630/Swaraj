@@ -333,15 +333,32 @@ class Swaraj:
 
     def _ui_handle_input(self, text):
         self.ui.set_state("thinking")
+        self.ui.set_agent_status("THINKING")
+
+        # Detect what kind of operation
+        text_lower = text.lower()
+        if "open" in text_lower:
+            self.ui.set_agent_status("OPENING")
+        elif "search" in text_lower:
+            self.ui.set_agent_status("SEARCHING")
+        elif "weather" in text_lower:
+            self.ui.set_agent_status("FETCHING")
+
         response, lang = self.process_command(text)
 
         if "See you" in response or "bye" in response.lower():
             self.ui.set_response(response)
+            self.ui.set_agent_status("OFFLINE")
             self.ui.root.after(1500, self.ui.destroy)
             return
 
+        self.ui.set_state("speaking")
+        self.ui.set_agent_status("SPEAKING")
         self.ui.set_response(response)
-        self.ui.set_state("idle")
+
+        # Return to idle after speaking
+        self.ui.root.after(3000, lambda: self.ui.set_state("idle"))
+        self.ui.root.after(3000, lambda: self.ui.set_agent_status("STANDBY"))
 
     def run_voice_mode(self, use_wake_word=True):
         owner_name = self.identity.get_owner_name() or "Shiva"

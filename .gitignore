@@ -29,3 +29,6 @@ desktop.ini
 
 # Images (user-specific)
 assets/rajmudra.png
+
+# Git internal files (if nested)
+.gitignore.2
