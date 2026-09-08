@@ -96,6 +96,14 @@ class SwarajApp:
         except Exception as e:
             logger.error(f"Voice init failed: {e}")
 
+    def _init_command_router(self):
+        try:
+            from core.router import CommandRouter
+            self.command_router = CommandRouter(self)
+            logger.startup("Command router initialized")
+        except Exception as e:
+            logger.error(f"Command router init failed: {e}")
+
     def _init_services(self):
         try:
             from services.startup.startup_service import StartupService
@@ -124,6 +132,8 @@ class SwarajApp:
             self.pipeline.initialize()
         except Exception as e:
             logger.error(f"Pipeline init failed: {e}")
+
+        self._init_command_router()
 
     def _on_resume(self):
         logger.info("System resumed - reinitializing services")
@@ -232,12 +242,8 @@ class SwarajApp:
                 logger.error(f"Text mode error: {e}")
 
     def _process_command(self, text):
-        from task_automation import TaskAutomation
-        automation = TaskAutomation()
-
-        task_result = automation.execute_command(text, self.config.get("general", "language", "english"))
-        if task_result:
-            return task_result, self.config.get("general", "language", "english")
+        if hasattr(self, 'command_router') and self.command_router:
+            return self.command_router.route(text)
 
         if self.ai_brain:
             return self.ai_brain.think(text)
