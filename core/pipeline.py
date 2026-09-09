@@ -3,6 +3,7 @@ Speech Pipeline
 ==============
 Integrates wake word → listen → process → respond cycle.
 Handles the complete voice interaction flow.
+Works offline with Vosk/Whisper STT.
 """
 
 import threading
@@ -20,17 +21,31 @@ class SpeechPipeline:
         self.wake_detector = None
         self.recognizer = None
         self.speaker = None
+        self._offline_stt = None
 
     def initialize(self):
         try:
             from core.wake_word_local import LocalWakeWordDetector
             self.wake_detector = LocalWakeWordDetector()
             self.wake_detector.set_callback(self._on_wake_word)
+
+            self._init_offline_stt()
+
             logger.info("Speech pipeline initialized")
             return True
         except Exception as e:
             logger.error(f"Speech pipeline init failed: {e}")
             return False
+
+    def _init_offline_stt(self):
+        """Initialize offline STT for command recognition."""
+        try:
+            from core.offline_stt import OfflineSTT
+            self._offline_stt = OfflineSTT()
+            if self._offline_stt.is_offline_available():
+                logger.startup(f"Pipeline offline STT: {self._offline_stt.get_available_backends()}")
+        except Exception as e:
+            logger.info(f"Pipeline offline STT not available: {e}")
 
     def start(self):
         if self._running:
@@ -79,12 +94,28 @@ class SpeechPipeline:
                 audio = recognizer.listen(source, timeout=5, phrase_time_limit=10)
 
             text = None
-            for lang in ["en-US", "hi-IN", "mr-IN"]:
+
+            # Try offline STT first
+            if self._offline_stt and self._offline_stt.is_offline_available():
                 try:
-                    text = recognizer.recognize_google(audio, language=lang)
-                    break
-                except sr.UnknownValueError:
-                    continue
+                    audio_data = audio.get_raw_data()
+                    text, lang = self._offline_stt.transcribe(audio_data=audio_data)
+                    if text:
+                        logger.info(f"Command heard (offline): {text}")
+                except Exception as e:
+                    logger.debug(f"Offline STT failed: {e}")
+
+            # Fallback to Google (online)
+            if not text:
+                for lang in ["en-US", "hi-IN", "mr-IN"]:
+                    try:
+                        text = recognizer.recognize_google(audio, language=lang)
+                        break
+                    except sr.UnknownValueError:
+                        continue
+                    except sr.RequestError:
+                        logger.warning("Google STT unavailable")
+                        break
 
             if text:
                 logger.info(f"Command heard: {text}")
@@ -136,3 +167,7 @@ class SpeechPipeline:
 
     def is_active(self):
         return self._active
+
+    def listen_and_respond(self):
+        """Listen for a single command and respond (used by wake-after-sleep)."""
+        self._on_wake_word()

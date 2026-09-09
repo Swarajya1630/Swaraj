@@ -17,6 +17,10 @@ Pillow==10.4.0
 # Camera (OpenCV)
 opencv-python==4.10.0.84
 
+# Offline STT (choose one or both)
+vosk==0.3.45
+# openai-whisper  # Uncomment for Whisper (requires more setup)
+
 # Optional: Local wake word (better than Google API)
 # pip install pvporcupine
 # pip install openwakeword

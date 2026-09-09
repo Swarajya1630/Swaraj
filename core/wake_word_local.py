@@ -1,8 +1,8 @@
 """
 Local Wake Word Detector
-=======================
+========================
 Detects wake words locally without cloud API.
-Uses energy-based detection + keyword spotting.
+Uses energy-based detection + local STT.
 """
 
 import threading
@@ -32,12 +32,25 @@ class LocalWakeWordDetector:
         self._listening = False
         self._callback = None
         self._thread = None
+        self._offline_stt = None
 
         if HAS_SR:
             self.recognizer = sr.Recognizer()
             self.recognizer.energy_threshold = energy_threshold
             self.recognizer.dynamic_energy_threshold = True
             self.recognizer.pause_threshold = 0.8
+
+        self._init_offline_stt()
+
+    def _init_offline_stt(self):
+        """Initialize offline STT for wake word detection."""
+        try:
+            from core.offline_stt import OfflineSTT
+            self._offline_stt = OfflineSTT()
+            if self._offline_stt.is_offline_available():
+                logger.startup("Offline wake word STT available")
+        except Exception as e:
+            logger.info(f"Offline wake word STT not available: {e}")
 
     def set_callback(self, callback):
         self._callback = callback
@@ -91,6 +104,24 @@ class LocalWakeWordDetector:
                     time.sleep(1)
 
     def _process_audio(self, audio):
+        # Try offline STT first
+        if self._offline_stt and self._offline_stt.is_offline_available():
+            try:
+                audio_data = audio.get_raw_data()
+                text, lang = self._offline_stt.transcribe(audio_data=audio_data)
+                if text:
+                    text = text.lower()
+                    logger.debug(f"Wake word heard (offline): '{text}'")
+                    for phrase in self.wake_words:
+                        if phrase in text:
+                            logger.info(f"Wake word detected: {phrase}")
+                            if self._callback:
+                                self._callback()
+                            return
+            except Exception as e:
+                logger.debug(f"Offline wake word STT failed: {e}")
+
+        # Fallback to Google (online)
         for lang in ["en-US", "hi-IN", "mr-IN"]:
             try:
                 text = self.recognizer.recognize_google(audio, language=lang).lower()
@@ -98,27 +129,26 @@ class LocalWakeWordDetector:
 
                 for phrase in self.wake_words:
                     if phrase in text:
-                        logger.info(f"Wake word detected: '{text}'")
+                        logger.info(f"Wake word detected: {phrase}")
                         if self._callback:
                             self._callback()
                         return
+
             except sr.UnknownValueError:
                 continue
-            except sr.RequestError as e:
-                logger.warning(f"Speech recognition error: {e}")
+            except sr.RequestError:
+                logger.warning("Google STT unavailable, using offline only")
                 break
-
-    def is_listening(self):
-        return self._listening
+            except Exception as e:
+                logger.debug(f"Wake word STT error ({lang}): {e}")
+                continue
 
 
 class EnergyBasedWakeDetector:
-    def __init__(self, energy_threshold=3000, silence_duration=0.5):
-        self.energy_threshold = energy_threshold
-        self.silence_duration = silence_duration
+    def __init__(self, threshold=500, callback=None):
+        self.threshold = threshold
+        self._callback = callback
         self._running = False
-        self._listening = False
-        self._callback = None
 
     def set_callback(self, callback):
         self._callback = callback
@@ -129,16 +159,14 @@ class EnergyBasedWakeDetector:
             return
 
         self._running = True
-        self._listening = True
-        thread = threading.Thread(target=self._energy_loop, daemon=True)
+        thread = threading.Thread(target=self._detect_loop, daemon=True)
         thread.start()
         logger.info("Energy-based wake detector started")
 
     def stop(self):
         self._running = False
-        self._listening = False
 
-    def _energy_loop(self):
+    def _detect_loop(self):
         p = pyaudio.PyAudio()
         stream = p.open(
             format=pyaudio.paInt16,
@@ -148,32 +176,28 @@ class EnergyBasedWakeDetector:
             frames_per_buffer=1024
         )
 
-        try:
-            while self._running:
-                if not self._listening:
-                    time.sleep(0.1)
-                    continue
-
+        while self._running:
+            try:
                 data = stream.read(1024, exception_on_overflow=False)
-                energy = self._calculate_energy(data)
+                volume = self._get_volume(data)
 
-                if energy > self.energy_threshold:
-                    logger.debug(f"Energy spike: {energy}")
-                    time.sleep(self.silence_duration)
-
+                if volume > self.threshold:
+                    logger.info(f"Energy spike detected: {volume}")
                     if self._callback:
                         self._callback()
 
-                time.sleep(0.01)
-        finally:
-            stream.stop_stream()
-            stream.close()
-            p.terminate()
+                time.sleep(0.1)
+            except Exception as e:
+                logger.error(f"Energy detection error: {e}")
+                time.sleep(1)
 
-    def _calculate_energy(self, data):
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+
+    def _get_volume(self, data):
+        """Calculate volume from audio data."""
         count = len(data) / 2
-        sum_squares = 0.0
-        for i in range(0, len(data), 2):
-            sample = struct.unpack('h', data[i:i+2])[0]
-            sum_squares += sample * sample
+        shorts = struct.unpack(f"{int(count)}h", data)
+        sum_squares = sum(s ** 2 for s in shorts)
         return (sum_squares / count) ** 0.5
