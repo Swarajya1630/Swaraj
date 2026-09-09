@@ -37,6 +37,11 @@ class AppControlCommand:
         "snipping tool": "SnippingTool.exe",
         "task manager": "taskmgr.exe",
         "control panel": "control.exe",
+        "opencode": r"C:\Users\Swayam Naik\AppData\Local\Programs\Python\Python313\python.exe -m opencode",
+        "opencode python": r"C:\Users\Swayam Naik\AppData\Local\Programs\Python\Python313\python.exe -m opencode",
+        "youtube": r"C:\Program Files\Google\Chrome\Application\chrome.exe --incognito https://www.youtube.com",
+        "canva": r"C:\Program Files\Canva\Canva\canva.exe",
+        "opera gx": r"C:\Users\{user}\AppData\Local\Opera GX Stable\Opera GX.exe",
     }
 
     STORE_APPS = {

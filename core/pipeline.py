@@ -82,7 +82,29 @@ class SpeechPipeline:
         if self.app and self.app.tray:
             self.app.tray.update_status("listening")
 
-        self._listen_for_command()
+        # Ask for command after wake
+        self._ask_for_command()
+
+    def _ask_for_command(self):
+        """Prompt user for command after wake word."""
+        if self.app and self.app.sound:
+            try:
+                self.app.sound.play("listening")
+            except:
+                pass
+
+        # Speak prompt
+        prompt = "Hello Shiva. What would you like me to do? I can open apps like OpenCode, YouTube, Canva, Opera GX, or listen to your command."
+
+        if self.app and self.app.sound:
+            try:
+                self.app.sound.speak(prompt)
+            except:
+                pass
+
+        logger.info(f"Prompt user: {prompt}")
+
+    def _listen_for_command(self):
 
     def _listen_for_command(self):
         try:
